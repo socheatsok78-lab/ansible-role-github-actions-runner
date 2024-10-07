@@ -32,7 +32,7 @@
 - include_tasks: runner-remove.yml
   when: github_actions_runner_state == 'absent'
 
-- name: Ensure runner scripts are removed
+- name: Remove "Automate Configuring Self-Hosted Runners" scripts after use
   ansible.builtin.file:
     path: "{{ github_actions_runner_bootstrap_user_home }}/{{ item.out }}"
     state: absent

@@ -1,4 +1,4 @@
-- name: Removing Self-Hosted Runners
+- name: Ensure self-hosted runner is removed
   environment:
     RUNNER_ALLOW_RUNASROOT: "true"
     RUNNER_CFG_PAT: "{{ github_pat }}"
@@ -9,7 +9,7 @@
     chdir: "{{ github_actions_runner_bootstrap_user_home }}"
   ignore_errors: true
 
-- name: Deleting Self-Hosted Runners
+- name: Force delete self-hosted runner from GitHub
   environment:
     RUNNER_CFG_PAT: "{{ github_pat }}"
   ansible.builtin.shell: |
