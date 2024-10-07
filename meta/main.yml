@@ -1,0 +1,15 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: github-actions-runner
+  author: socheatsok78
+  description: Setup and configure GitHub Self-Hosted Runners
+  company: "Socheat Labs"
+  license: "license (BSD, MIT)"
+  min_ansible_version: 2.4
+  platforms: []
+  galaxy_tags:
+    - github
+    - actions
+    - actions-runner

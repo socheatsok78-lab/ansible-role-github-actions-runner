@@ -1,0 +1,25 @@
+- name: Removing Self-Hosted Runners
+  environment:
+    RUNNER_ALLOW_RUNASROOT: "true"
+    RUNNER_CFG_PAT: "{{ github_pat }}"
+  ansible.builtin.shell: |
+    ./runner-remove.sh {{ github_organization }}
+  args:
+    executable: /bin/bash
+    chdir: "{{ github_actions_runner_bootstrap_user_home }}"
+  ignore_errors: true
+
+- name: Deleting Self-Hosted Runners
+  environment:
+    RUNNER_CFG_PAT: "{{ github_pat }}"
+  ansible.builtin.shell: |
+    ./runner-delete.sh {{ github_organization }}
+  args:
+    executable: /bin/bash
+    chdir: "{{ github_actions_runner_bootstrap_user_home }}"
+  ignore_errors: true
+
+- name: Ensure runner directory has been removed
+  ansible.builtin.file:
+    path: "{{ github_actions_runner_bootstrap_user_home }}/runner"
+    state: absent

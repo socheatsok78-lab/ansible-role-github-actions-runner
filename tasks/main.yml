@@ -1,0 +1,39 @@
+- name: Installing prerequisite packages
+  apt:
+    name:
+      - "curl"
+      - "jq"
+    state: present
+    update_cache: yes
+
+- name: Ensure {{ github_actions_runner_bootstrap_group }} group created
+  group:
+    name: "{{ github_actions_runner_bootstrap_group }}"
+    state: present
+
+- name: Ensure {{ github_actions_runner_bootstrap_user }} user created
+  user:
+    name: "{{ github_actions_runner_bootstrap_user }}"
+    state: present
+    shell: /bin/bash
+    password: "{{ github_actions_runner_bootstrap_user | password_hash('sha512','A512') }}"
+    group: "{{ github_actions_runner_bootstrap_group }}"
+
+- name: Download "Automate Configuring Self-Hosted Runners" scripts
+  ansible.builtin.get_url:
+    url: "{{ github_actions_runner_url }}/{{ item.in }}"
+    dest: "{{ github_actions_runner_bootstrap_user_home }}/{{ item.out }}"
+    mode: '0755'
+  loop: "{{ github_actions_runner_scripts }}"
+
+- include_tasks: runner-create.yml
+  when: github_actions_runner_state == 'present'
+
+- include_tasks: runner-remove.yml
+  when: github_actions_runner_state == 'absent'
+
+- name: Ensure runner scripts are removed
+  ansible.builtin.file:
+    path: "{{ github_actions_runner_bootstrap_user_home }}/{{ item.out }}"
+    state: absent
+  loop: "{{ github_actions_runner_scripts }}"

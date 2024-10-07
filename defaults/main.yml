@@ -1,0 +1,25 @@
+# Ansible Role Options
+github_actions_runner_state: present # or absent (default: present)
+
+# The GitHub Credentials
+github_pat: ""
+github_organization: ""
+
+# The GitHub Runner Configurations
+github_actions_runner_group: "Default"
+# github_actions_runner_labels: "self-hosted,linux,{{ ansible_architecture }}"
+
+# The user/group that the runner will be run on
+github_actions_runner_bootstrap_group: "github"
+github_actions_runner_bootstrap_user: "github"
+github_actions_runner_bootstrap_user_home: "/home/{{ github_actions_runner_bootstrap_user }}"
+
+# The GitHub Actions Runner Scripts
+github_actions_runner_url: https://raw.githubusercontent.com/actions/runner/main/scripts
+github_actions_runner_scripts:
+  - in: "create-latest-svc.sh"
+    out: "runner-create.sh"
+  - in: "remove-svc.sh"
+    out: "runner-remove.sh"
+  - in: "delete.sh"
+    out: "runner-delete.sh
