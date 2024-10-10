@@ -1,25 +1,47 @@
+- name: Check if "{{ github_actions_runner_bootstrap_user }}" user is present
+  ansible.builtin.user:
+    name: "{{ github_actions_runner_bootstrap_user }}"
+  check_mode: true
+  register: github_user
+
 - name: Ensure self-hosted runner is removed
-  environment:
-    RUNNER_ALLOW_RUNASROOT: "true"
-    RUNNER_CFG_PAT: "{{ github_pat }}"
-  ansible.builtin.shell: |
-    ./runner-remove.sh {{ github_organization }}
-  args:
-    executable: /bin/bash
-    chdir: "{{ github_actions_runner_bootstrap_user_home }}"
-  ignore_errors: true
+  when: github_user.state == 'present'
+  block:
+    - name: Download "Automate Configuring Self-Hosted Runners" scripts
+      ansible.builtin.get_url:
+        url: "{{ github_actions_runner_url }}/{{ item.in }}"
+        dest: "{{ github_actions_runner_bootstrap_user_home }}/{{ item.out }}"
+        mode: '0755'
+      loop: "{{ github_actions_runner_scripts }}"
 
-- name: Force delete self-hosted runner from GitHub
-  environment:
-    RUNNER_CFG_PAT: "{{ github_pat }}"
-  ansible.builtin.shell: |
-    ./runner-delete.sh {{ github_organization }}
-  args:
-    executable: /bin/bash
-    chdir: "{{ github_actions_runner_bootstrap_user_home }}"
-  ignore_errors: true
+    - name: Unregister self-hosted runner from GitHub
+      environment:
+        RUNNER_ALLOW_RUNASROOT: "true"
+        RUNNER_CFG_PAT: "{{ github_pat }}"
+      ansible.builtin.shell: |
+        ./runner-remove.sh {{ github_organization }}
+      args:
+        executable: /bin/bash
+        chdir: "{{ github_actions_runner_bootstrap_user_home }}"
+      ignore_errors: true
 
-- name: Ensure runner directory has been removed
-  ansible.builtin.file:
-    path: "{{ github_actions_runner_bootstrap_user_home }}/runner"
-    state: absent
+    - name: Force delete self-hosted runner from GitHub
+      environment:
+        RUNNER_CFG_PAT: "{{ github_pat }}"
+      ansible.builtin.shell: |
+        ./runner-delete.sh {{ github_organization }}
+      args:
+        executable: /bin/bash
+        chdir: "{{ github_actions_runner_bootstrap_user_home }}"
+      ignore_errors: true
+
+    - name: Ensure runner directory has been removed
+      ansible.builtin.file:
+        path: "{{ github_actions_runner_bootstrap_user_home }}/runner"
+        state: absent
+
+    - name: Remove "Automate Configuring Self-Hosted Runners" scripts after use
+      ansible.builtin.file:
+        path: "{{ github_actions_runner_bootstrap_user_home }}/{{ item.out }}"
+        state: absent
+      loop: "{{ github_actions_runner_scripts }}"
