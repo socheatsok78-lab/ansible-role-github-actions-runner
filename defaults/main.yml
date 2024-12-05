@@ -22,4 +22,4 @@ github_actions_runner_scripts:
   - in: "remove-svc.sh"
     out: "runner-remove.sh"
   - in: "delete.sh"
-    out: "runner-delete.sh
+    out: "runner-delete.sh"
